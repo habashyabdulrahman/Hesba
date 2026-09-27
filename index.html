@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0d3535">
+  <meta name="description" content="إدارة الدخل والمصروفات والعمل والديون">
+  <title>حِسبة</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="mark">ح</span><div><h1>حِسبة</h1><p id="page-subtitle">ملخص فلوسك</p></div></div>
+      <button id="install" class="icon-btn install" hidden>تثبيت</button>
+    </header>
+
+    <main>
+      <section class="page active" data-page="home" aria-labelledby="home-title">
+        <div class="page-head"><div><p class="eyebrow">الرئيسية</p><h2 id="home-title">نظرة سريعة</h2></div><label class="month-control">الشهر<input type="month" id="month"></label></div>
+
+        <article class="hero-card">
+          <div class="hero-top"><span>إجمالي المبلغ الحالي</span><button id="edit-opening" class="ghost-light" type="button">رصيد البداية</button></div>
+          <strong id="total-balance">€0.00</strong>
+          <div class="account-strip">
+            <div><span>كاش</span><b id="cash-balance">€0.00</b></div>
+            <div><span>حساب البنك</span><b id="bank-balance">€0.00</b></div>
+          </div>
+        </article>
+
+        <div class="metric-grid">
+          <article class="metric"><span>دخل مقبوض</span><b id="received-income">€0.00</b><small>هذا الشهر</small></article>
+          <article class="metric"><span>مصروفات المعيشة</span><b id="living-expenses">€0.00</b><small>هذا الشهر</small></article>
+          <article class="metric"><span>سداد الديون</span><b id="debt-paid-month">€0.00</b><small>هذا الشهر</small></article>
+          <article class="metric"><span>تحويلات العائلة</span><b id="family-month">€0.00</b><small>هذا الشهر</small></article>
+          <article class="metric wide"><span>صافي الشهر</span><b id="month-net">€0.00</b><small id="month-net-note">الدخل ناقص كل الأموال الخارجة</small></article>
+        </div>
+
+        <button class="debt-summary" id="open-debts" type="button">
+          <span><small>باقي الديون بالقيمة الحالية</small><strong id="debt-total">€0.00</strong></span>
+          <span class="arrow">‹</span>
+        </button>
+
+        <section class="panel">
+          <div class="panel-head"><div><p class="eyebrow">العمل</p><h3>ملخص الشهر</h3></div><button class="text-btn go-transactions" type="button">عرض السجل</button></div>
+          <div class="work-stats">
+            <div><strong id="work-days">0</strong><span>أيام عمل</span></div>
+            <div><strong id="earned-month">€0.00</strong><span>قيمة الشغل</span></div>
+            <div><strong id="receivables">€0.00</strong><span>مستحقات لم تُقبض</span></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><div><p class="eyebrow">الإحصائيات</p><h3>المصروفات حسب التصنيف</h3></div><span id="expense-count" class="muted"></span></div>
+          <div id="category-chart" class="category-chart"></div>
+        </section>
+
+        <section class="panel rates-panel">
+          <div class="panel-head"><div><p class="eyebrow">الأسعار</p><h3>العملات والذهب</h3></div><button id="refresh-rates" class="text-btn" type="button">تحديث</button></div>
+          <div class="rate-grid"><div><span>1 EUR</span><b id="usd-rate">— USD</b></div><div><span>1 EUR</span><b id="egp-rate">— EGP</b></div><div><span>جرام ذهب 21</span><b id="gold-rate">— EGP</b></div></div>
+          <div class="rate-meta"><span id="rates-updated">لم يتم التحديث</span><button id="manual-rates" class="link-button" type="button">تعديل يدوي</button></div>
+          <p class="attribution">أسعار العملات من <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer">Exchange Rate API</a> وسعر الذهب من <a href="https://gold-api.com" target="_blank" rel="noreferrer">Gold API</a>.</p>
+        </section>
+
+        <footer class="data-tools"><button id="export" type="button">تحميل نسخة احتياطية</button><label>استرجاع نسخة<input id="import" type="file" accept="application/json,.json" hidden></label><p>النسخة التجريبية تحفظ البيانات على هذا الجهاز.</p></footer>
+      </section>
+
+      <section class="page" data-page="transactions" aria-labelledby="transactions-title">
+        <div class="page-head"><div><p class="eyebrow">الحركات</p><h2 id="transactions-title">العمل والدخل والمصروف</h2></div></div>
+        <div class="quick-actions">
+          <button data-dialog="work-dialog"><span class="action-icon work">✓</span><b>يوم عمل</b><small>سجّل المستحق</small></button>
+          <button data-dialog="income-dialog"><span class="action-icon income">＋</span><b>مبلغ مقبوض</b><small>كاش أو بنك</small></button>
+          <button data-dialog="expense-dialog"><span class="action-icon expense">−</span><b>مصروف</b><small>مصروفات المعيشة</small></button>
+        </div>
+        <section class="panel">
+          <div class="panel-head"><div><p class="eyebrow">السجل</p><h3>كل الحركات</h3></div><span id="transaction-count" class="muted"></span></div>
+          <div class="filters"><select id="transaction-filter" aria-label="نوع الحركة"><option value="all">الكل</option><option value="work">أيام العمل</option><option value="income">الدخل المقبوض</option><option value="expense">المصروفات</option></select><input type="month" id="transaction-month" aria-label="شهر السجل"></div>
+          <div id="transaction-list" class="activity-list"></div>
+        </section>
+      </section>
+
+      <section class="page" data-page="transfers" aria-labelledby="transfers-title">
+        <div class="page-head"><div><p class="eyebrow">التحويلات</p><h2 id="transfers-title">حرّك فلوسك وسدّد ديونك</h2></div></div>
+        <div class="transfer-actions">
+          <button data-dialog="internal-dialog"><span class="transfer-symbol">⇄</span><span><b>بين الكاش والبنك</b><small>لا يغيّر إجمالي الرصيد</small></span><i>‹</i></button>
+          <button data-dialog="family-dialog"><span class="transfer-symbol family">⌂</span><span><b>تحويل للعائلة</b><small>المبلغ والرسوم والمبلغ المستلم</small></span><i>‹</i></button>
+          <button id="open-debt-payment" type="button"><span class="transfer-symbol debt">✓</span><span><b>سداد دَين</b><small>عملة أو ذهب عيار 21</small></span><i>‹</i></button>
+        </div>
+        <section class="panel">
+          <div class="panel-head"><div><p class="eyebrow">السجل</p><h3>التحويلات والسداد</h3></div><span id="transfer-count" class="muted"></span></div>
+          <div id="transfer-list" class="activity-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="التنقل الرئيسي">
+      <button class="active" data-target="home"><span>⌂</span>الرئيسية</button>
+      <button data-target="transactions"><span>≡</span>الحركات</button>
+      <button data-target="transfers"><span>⇄</span>التحويلات</button>
+    </nav>
+  </div>
+
+  <dialog id="opening-dialog"><form id="opening-form"><div class="dialog-head"><div><p class="eyebrow">الإعداد الأول</p><h3>رصيد البداية</h3></div><button type="button" class="close-dialog" aria-label="إغلاق">×</button></div><p class="form-note">اكتب الرصيد قبل أول حركة ستسجلها في التطبيق.</p><div class="form-grid"><label>كاش (€)<input id="opening-cash" type="number" inputmode="decimal" min="0" step="0.01" required></label><label>حساب البنك (€)<input id="opening-bank" type="number" inputmode="decimal" min="0" step="0.01" required></label></div><button class="primary" type="submit">حفظ رصيد البداية</button></form></dialog>
+
+  <dialog id="work-dialog"><form id="work-form"><div class="dialog-head"><div><p class="eyebrow">العمل</p><h3>تسجيل شغل</h3></div><button type="button" class="close-dialog" aria-label="إغلاق">×</button></div><div class="segmented"><label><input type="radio" name="workMode" value="daily" checked><span>يومية</span></label><label><input type="radio" name="workMode" value="project"><span>شغل خاص</span></label></div><label>الشركة أو صاحب العمل<input id="work-source" list="source-options" maxlength="70" required placeholder="مثلاً شركة البناء"></label><datalist id="source-options"></datalist><div class="form-grid"><label>التاريخ<input id="work-date" type="date" required></label><label>عدد الأيام<input id="work-days-input" type="number" min="1" step="1" value="1" required></label></div><label id="work-amount-label">اليومية (€)<input id="work-amount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="80"></label><label>موعد الحساب<select id="work-timing"><option value="month">آخر الشهر / الشهر التالي</option><option value="day">آخر اليوم</option><option value="finish">عند انتهاء الشغل</option><option value="custom">حسب الاتفاق</option></select></label><label>ملاحظة <span class="optional">اختياري</span><input id="work-note" maxlength="100"></label><button class="primary" type="submit">حفظ الشغل</button></form></dialog>
+
+  <dialog id="income-dialog"><form id="income-form"><div class="dialog-head"><div><p class="eyebrow">الدخل</p><h3>تسجيل مبلغ مقبوض</h3></div><button type="button" class="close-dialog" aria-label="إغلاق">×</button></div><label>نوع الدخل<select id="income-kind"><option value="work">مقابل شغل</option><option value="other">دخل آخر</option></select></label><label id="income-source-wrap">الشركة أو صاحب العمل<input id="income-source" list="source-options" maxlength="70" placeholder="اختر نفس اسم جهة العمل"></label><div class="form-grid"><label>المبلغ (€)<input id="income-amount" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><label>دخل إلى<select id="income-account"><option value="bank">حساب البنك</option><option value="cash">كاش</option></select></label><label>تاريخ القبض<input id="income-date" type="date" required></label></div><label>ملاحظة <span class="optional">اختياري</span><input id="income-note" maxlength="100"></label><button class="primary" type="submit">حفظ المبلغ</button></form></dialog>
+
+  <dialog id="expense-dialog"><form id="expense-form"><div class="dialog-head"><div><p class="eyebrow">المصروفات</p><h3>تسجيل مصروف</h3></div><button type="button" class="close-dialog" aria-label="إغلاق">×</button></div><div class="form-grid"><label>المبلغ (€)<input id="expense-amount" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><label>خرج من<select id="expense-account"><option value="cash">كاش</option><option value="bank">حساب البنك</option></select></label><label>التاريخ<input id="expense-date" type="date" required></label><label>التصنيف<select id="expense-category"><option>السكن</option><option>الطعام والبقالة</option><option>المواصلات وNavigo</option><option>الهاتف والإنترنت</option><option>الملابس والعناية الشخصية</option><option>الجيم</option><option>الصحة</option><option>أدوات ومصاريف العمل</option><option>ترفيه وخروجات</option><option>رسوم بنكية وتحويلات</option><option>أخرى</option></select></label></div><label>ملاحظة <span class="optional">اختياري</span><input id="expense-note" maxlength="100"></label><button class="primary" type="submit">حفظ المصروف</button></form></dialog>
+
+  <dialog id="internal-dialog"><form id="internal-form"><div class="dialog-head"><div><p class="eyebrow">تحويل داخلي</p><h3>بين الكاش والبنك</h3></div><button type="button" class="close-dialog" aria-label="إغلاق">×</button></div><div class="form-grid"><label>المبلغ (€)<input id="internal-amount" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><label>من<select id="internal-from"><option value="bank">حساب البنك</option><option value="cash">كاش</option></select></label><label>التاريخ<input id="internal-date" type="date" required></label></div><label>ملاحظة <span class="optional">اختياري</span><input id="internal-note" maxlength="100"></label><button class="primary" type="submit">تسجيل التحويل</button></form></dialog>
+
+  <dialog id="family-dialog"><form id="family-form"><div class="dialog-head"><div><p class="eyebrow">العائلة</p><h3>تسجيل تحويل للعائلة</h3></div><button type="button" class="close-dialog" aria-label="إغلاق">×</button></div><div class="form-grid"><label>المبلغ المرسل (€)<input id="family-amount" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><label>رسوم التحويل (€)<input id="family-fee" type="number" inputmode="decimal" min="0" step="0.01" value="0"></label><label>خرج من<select id="family-account"><option value="bank">حساب البنك</option><option value="cash">كاش</option></select></label><label>التاريخ<input id="family-date" type="date" required></label><label>المستلم<input id="family-recipient" maxlength="70" required placeholder="مثلاً الوالدة"></label><label>الوسيلة<input id="family-method" maxlength="70" placeholder="مثلاً TapTap Send"></label><label>الغرض<select id="family-purpose"><option value="support">مصروف للعائلة</option><option value="other">غرض آخر</option></select></label><label>المبلغ الذي وصل (EGP) <span class="optional">اختياري</span><input id="family-received-egp" type="number" inputmode="decimal" min="0" step="0.01"></label></div><label>ملاحظة <span class="optional">اختياري</span><input id="family-note" maxlength="100"></label><button class="primary" type="submit">حفظ التحويل</button></form></dialog>
+
+  <dialog id="debts-dialog" class="wide-dialog"><div class="dialog-head"><div><p class="eyebrow">الديون</p><h3>كل الديون</h3></div><button type="button" class="close-dialog" aria-label="إغلاق">×</button></div><div id="debt-list" class="debt-list"></div><details class="add-debt"><summary>إضافة دَين جديد</summary><form id="debt-form"><label>اسم صاحب الدين أو وصفه<input id="debt-name" maxlength="70" required></label><div class="form-grid"><label>نوع الدين<select id="debt-kind"><option value="EUR">يورو</option><option value="USD">دولار</option><option value="EGP">جنيه مصري</option><option value="GOLD21">ذهب عيار 21</option></select></label><label><span id="debt-amount-label">المبلغ</span><input id="debt-amount" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><label>تاريخ بداية الدين<input id="debt-date" type="date" required></label></div><label>ملاحظة <span class="optional">اختياري</span><input id="debt-note" maxlength="100"></label><button class="primary" type="submit">إضافة الدين</button></form></details></dialog>
+
+  <dialog id="debt-payment-dialog"><form id="debt-payment-form"><div class="dialog-head"><div><p class="eyebrow">سداد الديون</p><h3>تسجيل دفعة</h3></div><button type="button" class="close-dialog" aria-label="إغلاق">×</button></div><label>الدَين<select id="payment-debt" required></select></label><div id="no-debt-message" class="notice" hidden>أضف دينًا أولًا من بطاقة الديون في الرئيسية.</div><div id="payment-fields"><div class="form-grid"><label>المبلغ المرسل أو المدفوع (€)<input id="payment-eur" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><label>رسوم التحويل (€)<input id="payment-fee" type="number" inputmode="decimal" min="0" step="0.01" value="0"></label><label>خرج من<select id="payment-account"><option value="bank">حساب البنك</option><option value="cash">كاش</option></select></label><label>التاريخ<input id="payment-date" type="date" required></label></div><label id="paid-units-label">المبلغ الذي تم خصمه من الدين<input id="payment-units" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><div id="gold-payment-fields" hidden><div class="form-grid"><label>المبلغ الذي وصل (EGP) <span class="optional">اختياري</span><input id="payment-received-egp" type="number" inputmode="decimal" min="0" step="0.01"></label><label>سعر جرام 21 (EGP) <span class="optional">اختياري</span><input id="payment-gold-price" type="number" inputmode="decimal" min="0" step="0.01"></label></div></div><label>ملاحظة <span class="optional">اختياري</span><input id="payment-note" maxlength="100"></label><button class="primary" type="submit">حفظ دفعة الدين</button></div></form></dialog>
+
+  <dialog id="rates-dialog"><form id="rates-form"><div class="dialog-head"><div><p class="eyebrow">الأسعار</p><h3>تعديل يدوي</h3></div><button type="button" class="close-dialog" aria-label="إغلاق">×</button></div><p class="form-note">اكتب عدد الوحدات المقابلة ليورو واحد وسعر أوقية الذهب بالدولار.</p><label>1 EUR يساوي USD<input id="manual-usd" type="number" min="0.0001" step="0.0001" required></label><label>1 EUR يساوي EGP<input id="manual-egp" type="number" min="0.0001" step="0.0001" required></label><label>أوقية الذهب (USD)<input id="manual-gold" type="number" min="0.01" step="0.01" required></label><button class="primary" type="submit">حفظ الأسعار</button></form></dialog>
+
+  <dialog id="confirm-dialog"><form method="dialog"><h3>حذف الحركة؟</h3><p class="form-note">لن يمكن استرجاعها بعد الحذف.</p><div class="dialog-actions"><button value="cancel" class="soft-button">إلغاء</button><button value="delete" class="danger">حذف</button></div></form></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js" defer></script>
+</body>
+</html>
